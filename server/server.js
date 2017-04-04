@@ -10,9 +10,6 @@ const app = express()
 app.use(bodyParser.json());
 
 app.post('/entries', (req, res) => {
-
-  console.log(req.body);
-
   let entry = new Entry({
     text: req.body.text
   })
@@ -22,6 +19,14 @@ app.post('/entries', (req, res) => {
   }, (e) => {
     res.status(400).send(e);
   })
+});
+
+app.get('/entries', (req, res) => {
+  Entry.find().then((entries) => {
+    res.send({entries});
+  }, (e) => {
+    res.status(400).send(e);
+  });
 });
 
 app.listen(3000, () => {
