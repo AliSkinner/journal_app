@@ -1,12 +1,15 @@
 const expect = require('expect');
 const request = require('supertest');
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Entry} = require('./../models/entry');
 
 const entries =[{
+  _id: new ObjectID(),
   text: 'first test entry'
 }, {
+  _id: new ObjectID(),
   text: 'second test entry'
 }]
 
@@ -71,4 +74,33 @@ describe('GET /entries', () => {
         })
         .end(done);
   });
+});
+
+
+describe('GET /entries/:id', () => {
+
+  it('should return entry doc', (done) => {
+    request(app)
+      .get(`/entries/${entries[0]._id.toHexString()}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.text).toBe(entries[0].text)
+      })
+      .end(done);
+  });
+
+  it('should return a 404', (done) => {
+    request(app)
+      .get(`/entries/${new ObjectID().toHexString()}`)
+      .expect(404)
+      .end(done);
+  });
+
+  it('should return 404 for non-object ids', (done) => {
+    request(app)
+      .get('/entries/123')
+      .expect(404)
+      .end(done);
+  });
+
 });
