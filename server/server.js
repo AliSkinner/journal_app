@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
 
 const {mongoose} = require('./db/mongoose');
 const {Entry} = require('./models/entry');
@@ -18,7 +19,7 @@ app.post('/entries', (req, res) => {
     res.send(doc);
   }, (e) => {
     res.status(400).send(e);
-  })
+  });
 });
 
 app.get('/entries', (req, res) => {
@@ -28,6 +29,22 @@ app.get('/entries', (req, res) => {
     res.status(400).send(e);
   });
 });
+
+app.get('/entries/:id', (req, res) => {
+  let id = req.params.id;
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  Entry.findById(id).then((entry) =>{
+    if (!entry) {
+      return res.status(404).send();
+    }
+    res.status(200).send(entry);
+  }).catch((e) => res.send(400));
+});
+
 
 app.listen(3000, () => {
   console.log('listening on 3000');
