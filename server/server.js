@@ -7,6 +7,7 @@ const {Entry} = require('./models/entry');
 const {User} = require('./models/user');
 
 const app = express()
+const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
@@ -46,8 +47,8 @@ app.get('/entries/:id', (req, res) => {
 });
 
 
-app.listen(3000, () => {
-  console.log('listening on 3000');
+app.listen(port, () => {
+  console.log(`listening on ${port}`);
 });
 
 module.exports = {app};
