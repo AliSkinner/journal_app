@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
@@ -60,6 +61,34 @@ app.delete('/entries/:id', (req, res) => {
 
     res.status(200).send({entry});
   }).catch((e) => res.status(400).send());
+
+});
+
+app.patch('/entries/:id', (req, res) => {
+  let id = req.params.id;
+  let body = _.pick(req.body, ['text', 'private']);
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  if(_.isBoolean(body.private) && body.private) {
+    body.privatisedAt = new Date().getTime();
+  } else {
+    body.private = false;
+    body.privatisedAt = null;
+  }
+
+  Entry.findByIdAndUpdate(id, {$set: body}, {new: true}).then((entry) => {
+    if (!entry) {
+      return res.status(404).send();
+    }
+
+    res.send({entry})
+
+  }).catch((e) => {
+    res.status(400).send();
+  })
 
 });
 

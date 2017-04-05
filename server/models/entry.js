@@ -11,7 +11,7 @@ const Entry = mongoose.model('Entry', {
     type: Boolean,
     default: false
   },
-  archivedAt: {
+  privatisedAt: {
     type: Number,
     default: null
   }
@@ -29,7 +29,7 @@ const Entry = mongoose.model('Entry', {
 // let otherEntry = new Entry({
 //   text: '  hi    ',
 //   // private: true,
-//   // archivedAt: 123
+//   // privatisedAt: 123
 // });
 //
 // otherEntry.save().then((doc) => {
