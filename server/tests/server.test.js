@@ -7,10 +7,12 @@ const {Entry} = require('./../models/entry');
 
 const entries =[{
   _id: new ObjectID(),
-  text: 'first test entry'
+  text: 'first test entry',
 }, {
   _id: new ObjectID(),
-  text: 'second test entry'
+  text: 'second test entry',
+  isPrivate: true,
+  privatisedAt: 333
 }]
 
 beforeEach((done) => {
@@ -141,5 +143,40 @@ describe('DELETE /entries/:id', () => {
       .delete(`/entries/${id}`)
       .expect(404)
       .end(done);
+  });
+});
+
+
+describe('PATCH /entries/:id', () => {
+
+  it('should update the entry', (done) => {
+    let id = entries[0]._id.toHexString();
+    let text = 'some new text';
+    let isPrivate = true;
+
+    request(app)
+      .patch(`/entries/${id}`)
+      .send({text, isPrivate})
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.entry.text).toBe(text);
+        expect(res.body.entry.isPrivate).toBe(true);
+        expect(res.body.entry.privatisedAt).toBeA('number');
+      }).end(done);
+
+  });
+
+  it('should clear privatisedAt when not isPrivate', (done) => {
+    let id = entries[1]._id.toHexString();
+    let isPrivate = false;
+
+    request(app)
+      .patch(`/entries/${id}`)
+      .send({isPrivate})
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.entry.isPrivate).toBe(false);
+        expect(res.body.entry.privatisedAt).toBe(null);
+      }).end(done);
   });
 });

@@ -66,16 +66,16 @@ app.delete('/entries/:id', (req, res) => {
 
 app.patch('/entries/:id', (req, res) => {
   let id = req.params.id;
-  let body = _.pick(req.body, ['text', 'private']);
+  let body = _.pick(req.body, ['text', 'isPrivate']);
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
   }
 
-  if(_.isBoolean(body.private) && body.private) {
+  if(_.isBoolean(body.isPrivate) && body.isPrivate) {
     body.privatisedAt = new Date().getTime();
   } else {
-    body.private = false;
+    body.isPrivate = false;
     body.privatisedAt = null;
   }
 

@@ -7,7 +7,7 @@ const Entry = mongoose.model('Entry', {
     minLength: 1,
     trim: true
   },
-  private: {
+  isPrivate: {
     type: Boolean,
     default: false
   },
@@ -28,7 +28,7 @@ const Entry = mongoose.model('Entry', {
 //
 // let otherEntry = new Entry({
 //   text: '  hi    ',
-//   // private: true,
+//   // isPrivate: true,
 //   // privatisedAt: 123
 // });
 //
