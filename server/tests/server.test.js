@@ -102,5 +102,44 @@ describe('GET /entries/:id', () => {
       .expect(404)
       .end(done);
   });
+});
 
+describe('DELETE /entries/:id', () => {
+
+  it('should remove an entry', (done) => {
+    let id = entries[1]._id.toHexString();
+    request(app)
+      .delete(`/entries/${id}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.entry._id).toBe(id)
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        Entry.findById(id).then((entry) => {
+          expect(entry).toNotExist();
+          done();
+        }).catch((e) => done(e));
+      });
+  });
+
+  it('should return a 404 if entry not found', (done) => {
+    let id = new ObjectID().toHexString();
+    request(app)
+      .delete(`/entries/${id}`)
+      .expect(404)
+      .end(done);
+  });
+
+  it('should remove return 404 if entry id is invalid', (done) => {
+    let id = 'abc';
+
+    request(app)
+      .delete(`/entries/${id}`)
+      .expect(404)
+      .end(done);
+  });
 });
