@@ -46,6 +46,23 @@ app.get('/entries/:id', (req, res) => {
   }).catch((e) => res.send(400));
 });
 
+app.delete('/entries/:id', (req, res) => {
+  let id = req.params.id;
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  Entry.findByIdAndRemove(id).then((entry) => {
+    if(!entry) {
+      return res.status(404).send();
+    }
+
+    res.status(200).send({entry});
+  }).catch((e) => res.status(400).send());
+
+});
+
 
 app.listen(port, () => {
   console.log(`listening on ${port}`);
