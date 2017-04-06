@@ -1,8 +1,13 @@
 # Journal App
 
-Playing around with Node. Making a REST API.
+Rest API for Journal entries.
 
-### To run
+Tech: NodeJS, Express, MongoDB, Mongoose, Mocha  
+
+Prod URL: https://protected-sands-74143.herokuapp.com/
+
+### To run locally
+* install [MongoDB](url: https://www.mongodb.com/download-center#community)
 * `git clone git@github.com:AliSkinner/journal_app.git`
 * `cd journal_app`
 * `npm install`
@@ -16,5 +21,10 @@ root: http://localhost:3000/
 
 GET /entries
 POST /entries
+
+GET /users/me
+POST /users
+
+POST /users/login
 
 ```
