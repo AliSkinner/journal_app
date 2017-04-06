@@ -17,25 +17,4 @@ const Entry = mongoose.model('Entry', {
   }
 });
 
-// let newEntry = new Entry ({
-//   text: 'went for run.'
-// });
-// newEntry.save().then((doc) => {
-//   console.log('Saved Entry', doc);
-// }, (e) => {
-//   console.log('error', e);
-// });
-//
-// let otherEntry = new Entry({
-//   text: '  hi    ',
-//   // isPrivate: true,
-//   // privatisedAt: 123
-// });
-//
-// otherEntry.save().then((doc) => {
-//   console.log(JSON.stringify(doc, undefined, 2));
-// }, (e) => {
-//   console.log(e);
-// });
-
-module.exports = {Entry}
+module.exports = {Entry};
