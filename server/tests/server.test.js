@@ -17,6 +17,7 @@ describe('POST /entries', () => {
 
       request(app)
         .post('/entries')
+        .set('x-auth', users[0].tokens[0].token)
         .send({text})
         .expect(200)
         .expect((res) => {
@@ -33,13 +34,14 @@ describe('POST /entries', () => {
             done();
           }).catch((e) => done(e));
 
-        })
+        });
   });
 
   it('should not create Entry with invalid body data', (done) => {
 
     request(app)
       .post('/entries')
+      .set('x-auth', users[0].tokens[0].token)
       .send({})
       .expect(400)
       .end((err, res) => {
@@ -60,9 +62,10 @@ describe('GET /entries', () => {
   it('should get all entries', (done) => {
       request(app)
         .get('/entries')
+        .set('x-auth', users[0].tokens[0].token)
         .expect(200)
         .expect((res) => {
-          expect(res.body.entries.length).toBe(2)
+          expect(res.body.entries.length).toBe(1)
         })
         .end(done);
   });
@@ -74,6 +77,7 @@ describe('GET /entries/:id', () => {
   it('should return entry doc', (done) => {
     request(app)
       .get(`/entries/${entries[0]._id.toHexString()}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(200)
       .expect((res) => {
         expect(res.body.text).toBe(entries[0].text)
@@ -84,6 +88,7 @@ describe('GET /entries/:id', () => {
   it('should return a 404', (done) => {
     request(app)
       .get(`/entries/${new ObjectID().toHexString()}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(done);
   });
@@ -91,6 +96,15 @@ describe('GET /entries/:id', () => {
   it('should return 404 for non-object ids', (done) => {
     request(app)
       .get('/entries/123')
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(404)
+      .end(done);
+  });
+
+  it('should not return entry doc created by other user', (done) => {
+    request(app)
+      .get(`/entries/${entries[1]._id.toHexString()}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(done);
   });
@@ -100,8 +114,10 @@ describe('DELETE /entries/:id', () => {
 
   it('should remove an entry', (done) => {
     let id = entries[1]._id.toHexString();
+
     request(app)
       .delete(`/entries/${id}`)
+      .set('x-auth', users[1].tokens[0].token)
       .expect(200)
       .expect((res) => {
         expect(res.body.entry._id).toBe(id)
@@ -122,6 +138,7 @@ describe('DELETE /entries/:id', () => {
     let id = new ObjectID().toHexString();
     request(app)
       .delete(`/entries/${id}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(done);
   });
@@ -131,8 +148,28 @@ describe('DELETE /entries/:id', () => {
 
     request(app)
       .delete(`/entries/${id}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(done);
+  });
+
+  it('should not remove an entry creted by another user', (done) => {
+    let id = entries[1]._id.toHexString();
+
+    request(app)
+      .delete(`/entries/${id}`)
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(404)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        Entry.findById(id).then((entry) => {
+          expect(entry).toExist();
+          done();
+        }).catch((e) => done(e));
+      });
   });
 });
 
@@ -146,6 +183,7 @@ describe('PATCH /entries/:id', () => {
 
     request(app)
       .patch(`/entries/${id}`)
+      .set('x-auth', users[0].tokens[0].token)
       .send({text, isPrivate})
       .expect(200)
       .expect((res) => {
@@ -153,7 +191,19 @@ describe('PATCH /entries/:id', () => {
         expect(res.body.entry.isPrivate).toBe(true);
         expect(res.body.entry.privatisedAt).toBeA('number');
       }).end(done);
+  });
 
+  it('should not update an entry made by another user', (done) => {
+    let id = entries[0]._id.toHexString();
+    let text = 'some new text';
+    let isPrivate = true;
+
+    request(app)
+      .patch(`/entries/${id}`)
+      .set('x-auth', users[1].tokens[0].token)
+      .send({text, isPrivate})
+      .expect(404)
+      .end(done);
   });
 
   it('should clear privatisedAt when not isPrivate', (done) => {
@@ -162,6 +212,7 @@ describe('PATCH /entries/:id', () => {
 
     request(app)
       .patch(`/entries/${id}`)
+      .set('x-auth', users[1].tokens[0].token)
       .send({isPrivate})
       .expect(200)
       .expect((res) => {
@@ -266,7 +317,7 @@ describe('POST /users/login', () => {
         }
 
         User.findById(users[1]._id).then((user) => {
-          expect(user.tokens[0]).toInclude({
+          expect(user.tokens[1]).toInclude({
             access: 'auth',
             token: res.headers['x-auth']
           })
@@ -292,7 +343,7 @@ describe('POST /users/login', () => {
         }
 
         User.findById(users[1]._id).then((user) => {
-          expect(user.tokens.length).toBe(0);
+          expect(user.tokens.length).toBe(1);
           done();
         }).catch((e) => done(e));
       });

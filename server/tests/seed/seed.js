@@ -3,22 +3,6 @@ const {Entry} = require('./../../models/entry');
 const {User} = require('./../../models/user');
 const jwt = require('jsonwebtoken')
 
-const entries =[{
-  _id: new ObjectID(),
-  text: 'first test entry',
-}, {
-  _id: new ObjectID(),
-  text: 'second test entry',
-  isPrivate: true,
-  privatisedAt: 333
-}]
-
-const populateEntries = (done) => {
-  Entry.remove({}).then(() => {
-    return Entry.insertMany(entries);
-  }).then(() => done());
-};
-
 
 const userOneId = new ObjectID();
 const userTwoId = new ObjectID();
@@ -34,7 +18,11 @@ const users =[{
 }, {
   _id: userTwoId,
   email: 'test2@test.com',
-  password: 'testpassword2'
+  password: 'testpassword2',
+  tokens: [{
+    access: 'auth',
+    token: jwt.sign({_id: userTwoId, access: 'auth'}, 'abc123').toString()
+  }]
 }]
 
 const populateUsers = (done) => {
@@ -44,5 +32,25 @@ const populateUsers = (done) => {
     return Promise.all([userOne, userTwo])
   }).then(() => done());
 };
+
+
+const entries =[{
+  _creator: userOneId,
+  _id: new ObjectID(),
+  text: 'first test entry',
+}, {
+  _creator: userTwoId,
+  _id: new ObjectID(),
+  text: 'second test entry',
+  isPrivate: true,
+  privatisedAt: 333
+}];
+
+const populateEntries = (done) => {
+  Entry.remove({}).then(() => {
+    return Entry.insertMany(entries);
+  }).then(() => done());
+};
+
 
 module.exports = {entries, populateEntries, users, populateUsers}

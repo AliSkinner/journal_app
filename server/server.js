@@ -16,9 +16,10 @@ const port = process.env.PORT;
 
 app.use(bodyParser.json());
 
-app.post('/entries', (req, res) => {
+app.post('/entries', authenticate, (req, res) => {
   let entry = new Entry({
-    text: req.body.text
+    text: req.body.text,
+    _creator: req.user._id
   })
 
   entry.save().then((doc) => {
@@ -28,22 +29,27 @@ app.post('/entries', (req, res) => {
   });
 });
 
-app.get('/entries', (req, res) => {
-  Entry.find().then((entries) => {
+app.get('/entries', authenticate, (req, res) => {
+  Entry.find({
+    _creator: req.user._id,
+  }).then((entries) => {
     res.send({entries});
   }, (e) => {
     res.status(400).send(e);
   });
 });
 
-app.get('/entries/:id', (req, res) => {
+app.get('/entries/:id', authenticate, (req, res) => {
   let id = req.params.id;
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
   }
 
-  Entry.findById(id).then((entry) =>{
+  Entry.findOne({
+    _id: id,
+    _creator: req.user._id
+  }).then((entry) =>{
     if (!entry) {
       return res.status(404).send();
     }
@@ -51,14 +57,17 @@ app.get('/entries/:id', (req, res) => {
   }).catch((e) => res.send(400));
 });
 
-app.delete('/entries/:id', (req, res) => {
+app.delete('/entries/:id', authenticate, (req, res) => {
   let id = req.params.id;
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
   }
 
-  Entry.findByIdAndRemove(id).then((entry) => {
+  Entry.findOneAndRemove({
+    _id: id,
+    _creator: req.user.id
+  }).then((entry) => {
     if(!entry) {
       return res.status(404).send();
     }
@@ -68,7 +77,7 @@ app.delete('/entries/:id', (req, res) => {
 
 });
 
-app.patch('/entries/:id', (req, res) => {
+app.patch('/entries/:id', authenticate, (req, res) => {
   let id = req.params.id;
   let body = _.pick(req.body, ['text', 'isPrivate']);
 
@@ -83,7 +92,10 @@ app.patch('/entries/:id', (req, res) => {
     body.privatisedAt = null;
   }
 
-  Entry.findByIdAndUpdate(id, {$set: body}, {new: true}).then((entry) => {
+  Entry.findOneAndUpdate({
+    _id: id,
+    _creator: req.user.id
+  }, {$set: body}, {new: true}).then((entry) => {
     if (!entry) {
       return res.status(404).send();
     }

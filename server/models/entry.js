@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const Entry = mongoose.model('Entry', {
+  _creator: {
+    required: true,
+    type: mongoose.Schema.Types.ObjectId
+  },
   text: {
     type: String,
     required: true,
