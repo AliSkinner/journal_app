@@ -1,13 +1,12 @@
 const {ObjectID} = require('mongodb');
 const {Entry} = require('./../../models/entry');
 const {User} = require('./../../models/user');
-const jwt = require('jsonwebtoken')
-
+const jwt = require('jsonwebtoken');
 
 const userOneId = new ObjectID();
 const userTwoId = new ObjectID();
 
-const users =[{
+const users = [{
   _id: userOneId,
   email: 'test@test.com',
   password: 'testpassword',
@@ -23,18 +22,18 @@ const users =[{
     access: 'auth',
     token: jwt.sign({_id: userTwoId, access: 'auth'}, process.env.JWT_SECRET).toString()
   }]
-}]
+}];
 
 const populateUsers = (done) => {
   User.remove({}).then(() => {
-    let userOne = new User(users[0]).save()
-    let userTwo = new User(users[1]).save()
-    return Promise.all([userOne, userTwo])
+    let userOne = new User(users[0]).save();
+    let userTwo = new User(users[1]).save();
+    return Promise.all([userOne, userTwo]);
   }).then(() => done());
 };
 
 
-const entries =[{
+const entries = [{
   _creator: userOneId,
   _id: new ObjectID(),
   text: 'first test entry',
@@ -53,4 +52,4 @@ const populateEntries = (done) => {
 };
 
 
-module.exports = {entries, populateEntries, users, populateUsers}
+module.exports = {entries, populateEntries, users, populateUsers};

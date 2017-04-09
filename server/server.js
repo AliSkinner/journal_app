@@ -9,7 +9,6 @@ const {mongoose} = require('./db/mongoose');
 const {Entry} = require('./models/entry');
 const {User} = require('./models/user');
 const {authenticate} = require('./middleware/authenticate');
-const bcrypt = require('bcryptjs');
 
 const app = express();
 const port = process.env.PORT;
@@ -20,7 +19,7 @@ app.post('/entries', authenticate, (req, res) => {
   let entry = new Entry({
     text: req.body.text,
     _creator: req.user._id
-  })
+  });
 
   entry.save().then((doc) => {
     res.send(doc);
@@ -68,7 +67,7 @@ app.delete('/entries/:id', authenticate, (req, res) => {
     _id: id,
     _creator: req.user.id
   }).then((entry) => {
-    if(!entry) {
+    if (!entry) {
       return res.status(404).send();
     }
 
@@ -100,11 +99,11 @@ app.patch('/entries/:id', authenticate, (req, res) => {
       return res.status(404).send();
     }
 
-    res.send({entry})
+    res.send({entry});
 
   }).catch((e) => {
     res.status(400).send();
-  })
+  });
 });
 
 app.post('/users', (req, res) => {
@@ -112,7 +111,7 @@ app.post('/users', (req, res) => {
   let user = new User(body);
 
   user.save().then(() => {
-    return user.generateAuthToken()
+    return user.generateAuthToken();
   }).then((token) => {
     res.header('x-auth', token).send(user);
   }).catch((err) => {
@@ -132,7 +131,7 @@ app.post('/users/login', (req, res) => {
       res.header('x-auth', token).send(user);
     });
   }).catch((err) => {
-    console.log(err)
+    console.log(err);
     res.status(400).send();
   });
 });
